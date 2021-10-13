@@ -58,6 +58,14 @@ def dilation(img: np.ndarray, kernal: np.ndarray):
 
     return newImg[pad_x:-pad_x, pad_y:-pad_y]
 
+def conv(x: np.ndarray, y: np.ndarray):
+    fr = fft2(x)
+    fr2 = fft2(np.flipud(np.fliplr(y)))
+    m,n = fr.shape
+    cc = np.real(ifft2(fr*fr2))
+    cc = np.roll(cc, -m/2+1,axis=0)
+    cc = np.roll(cc, -n/2+1,axis=1)
+    return cc
 
 
 # img = np.ones([10, 10], dtype=np.int8)
