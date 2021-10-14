@@ -19,12 +19,11 @@ def main():
     img = functions.conv(img, np.ones([11, 11])/121).astype(np.uint8)
     
     img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 199, 5)
-
+    
     img = functions.dilation(img, np.ones([3, 3]))
 
     img = functions.erosion(img, np.ones([5, 5]))
 
-    # num_labels, labels = cv2.connectedComponents(img, connectivity=4)
     labels = functions.connectedComponents(img)
     
     uni, cnt = np.unique(labels, return_counts=True)

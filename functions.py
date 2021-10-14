@@ -33,9 +33,7 @@ def dilation(img: np.ndarray, kernal: np.ndarray):
 
     assert len(img.shape) == 2, '輸入需為二值化圖像'
     assert (m % 2 == 1) & (n % 2 == 1), 'kernel需為奇數'
-
     
-
     f_img = img.reshape(-1, 1)
     b = f_img * kernal.flatten()   
     b = b.reshape(-1, m, n).astype(np.uint8)
@@ -97,6 +95,7 @@ def connectedComponents(x:np.ndarray):
 def ad(x:np.ndarray):
     # https://cloud.tencent.com/developer/ask/72570
 
-
+    # 高斯conv. avg.
+    # threshold
 
     return x
