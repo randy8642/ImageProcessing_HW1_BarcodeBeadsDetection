@@ -19,7 +19,7 @@ def erosion(img: np.ndarray, kernal: np.ndarray):
     assert (kernal.shape[0] % 2 == 1) & (kernal.shape[1] % 2 == 1), 'kernel需為奇數'
     
 
-    res = conv(img, kernal).astype(np.uint8)
+    res = conv(img, kernal, 0).astype(np.uint8)
 
     res[res < len(kernal.flatten())] = 0
     res[res >= len(kernal.flatten())] = 1
@@ -33,22 +33,22 @@ def dilation(img: np.ndarray, kernal: np.ndarray):
 
     assert len(img.shape) == 2, '輸入需為二值化圖像'
     assert (m % 2 == 1) & (n % 2 == 1), 'kernel需為奇數'
-    
-    f_img = img.reshape(-1, 1)
-    b = f_img * kernal.flatten()   
-    b = b.reshape(-1, m, n).astype(np.uint8)
 
-    res = np.zeros([img.shape[0] + m//2 *2, img.shape[1] + n//2 *2], dtype=np.uint8)
-    for n, (i, j) in enumerate(itertools.product(range(res.shape[0]-m+1), range(res.shape[1]-n+1 ))):     
-        res[i:i+kernal.shape[0], j:j+kernal.shape[1]] = np.logical_or(b[n], res[i:i+kernal.shape[0], j:j+kernal.shape[1]])
+    img_inv = np.logical_not(img)
+
+    res = conv(img_inv, kernal, 1).astype(np.uint8)
+    res[res < len(kernal.flatten())] = 1
+    res[res >= len(kernal.flatten())] = 0
+
+    
 
     return res
 
 
-def conv(x: np.ndarray, y: np.ndarray) -> np.ndarray:
+def conv(x: np.ndarray, y: np.ndarray, pad_num = 0) -> np.ndarray:
     # pad
     pad = np.array(y.shape) // 2
-    padded_x = np.zeros([x.shape[0] + pad[0]*2, x.shape[1] + pad[1]*2])
+    padded_x = np.ones([x.shape[0] + pad[0]*2, x.shape[1] + pad[1]*2]) * pad_num
     padded_x[pad[0]:-pad[0], pad[1]:-pad[1]] = x
     
 
@@ -92,10 +92,28 @@ def connectedComponents(x:np.ndarray):
 
     return flag
 
-def ad(x:np.ndarray):
+def adaptiveThreshold(x:np.ndarray, kernalSize=3):
     # https://cloud.tencent.com/developer/ask/72570
 
-    # 高斯conv. avg.
-    # threshold
+    sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
+    guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
+    avg_guass_kernal = guass_kernal 
 
-    return x
+    threshold = conv(x, avg_guass_kernal, 0) - 5
+    
+
+    res = np.ones(x.shape, dtype=np.uint8)*255
+    res[x < threshold] = 0
+
+    return res, threshold
+
+def get_guassKernal(l=5, sig=1.) -> np.ndarray:
+    """\
+    creates gaussian kernel with side length `l` and a sigma of `sig`
+    """
+    ax = np.linspace(-(l - 1) / 2., (l - 1) / 2., l)
+    gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
+    kernel = np.outer(gauss, gauss)
+    return kernel / np.sum(kernel)
+
+

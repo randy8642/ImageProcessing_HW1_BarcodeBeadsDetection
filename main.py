@@ -18,8 +18,12 @@ def main():
     
     img = functions.conv(img, np.ones([11, 11])/121).astype(np.uint8)
     
-    img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 199, 5)
-    
+    # img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 199, 5)
+    img, t = functions.adaptiveThreshold(img, kernalSize = 199)
+    showImg(t)
+    showImg(img)
+    exit()
+
     img = functions.dilation(img, np.ones([3, 3]))
 
     img = functions.erosion(img, np.ones([5, 5]))
