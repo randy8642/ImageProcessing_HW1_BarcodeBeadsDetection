@@ -14,17 +14,14 @@ NCKU 110-1 影像處理與機器人視覺：基礎與設計 作業1
 
 
 ## 處理步驟說明
-### Step 1 : Histogram Equalization
+### Step 1 : Adaptive Threshold
 
-### Step 2 : Average Filter
+### Step 2 : Erosion
 
-### Step 3 : Adaptive Threshold
+### Step 3 : Dilation
 
-### Step 4 : Opening
+### Step 4 : Connected Component Labeling filter
 
-### Step 5 : Connected Component Labeling filter
-
-### Step 6 : Erosion
 
 ## 結果
 ### 樣張 1
