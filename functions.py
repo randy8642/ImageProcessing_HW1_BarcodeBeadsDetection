@@ -37,10 +37,11 @@ def dilation(img: np.ndarray, kernal: np.ndarray):
     return res
 
 
-def conv(x: np.ndarray, y: np.ndarray, pad_num = 0) -> np.ndarray:
+def conv(x: np.ndarray, y: np.ndarray, pad_value = 0) -> np.ndarray:
+
     # pad
     pad = np.array(y.shape) // 2
-    padded_x = np.ones([x.shape[0] + pad[0]*2, x.shape[1] + pad[1]*2]) * pad_num
+    padded_x = np.ones([x.shape[0] + pad[0]*2, x.shape[1] + pad[1]*2]) * pad_value
     padded_x[pad[0]:-pad[0], pad[1]:-pad[1]] = x
     
 
@@ -88,12 +89,10 @@ def adaptiveThreshold(x:np.ndarray, kernalSize=3):
 
     sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
     guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
-    avg_guass_kernal = guass_kernal 
+    threshold = conv(x, guass_kernal, 0) - 5
 
-    threshold = conv(x, avg_guass_kernal, 0) - 5    
-
-    res = np.ones(x.shape, dtype=np.uint8) * 255
-    res[x < threshold] = 0
+    res = np.zeros(x.shape, dtype=np.uint8)
+    res[x < threshold] = 1
 
     return res
 
