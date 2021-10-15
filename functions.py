@@ -15,15 +15,12 @@ def readImages(folderPath:str) -> list:
     return [cv2.imread(os.path.join(folderPath, file)) for file in fileList]
 
 def erosion(img: np.ndarray, kernal: np.ndarray):
-    assert len(img.shape) == 2, '輸入需為二值化圖像'
-    assert (kernal.shape[0] % 2 == 1) & (kernal.shape[1] % 2 == 1), 'kernel需為奇數'
-    
+    m, n = kernal.shape
 
     res = conv(img, kernal, 0).astype(np.uint8)
 
-    res[res < len(kernal.flatten())] = 0
-    res[res >= len(kernal.flatten())] = 1
-    
+    res[res < m*n] = 0
+    res[res >= m*n] = 1
 
     return res
 
@@ -31,16 +28,11 @@ def erosion(img: np.ndarray, kernal: np.ndarray):
 def dilation(img: np.ndarray, kernal: np.ndarray):
     m, n = kernal.shape
 
-    assert len(img.shape) == 2, '輸入需為二值化圖像'
-    assert (m % 2 == 1) & (n % 2 == 1), 'kernel需為奇數'
-
     img_inv = np.logical_not(img)
 
     res = conv(img_inv, kernal, 1).astype(np.uint8)
-    res[res < len(kernal.flatten())] = 1
-    res[res >= len(kernal.flatten())] = 0
-
-    
+    res[res < m*n] = 1
+    res[res >= m*n] = 0
 
     return res
 
@@ -93,19 +85,17 @@ def connectedComponents(x:np.ndarray):
     return flag
 
 def adaptiveThreshold(x:np.ndarray, kernalSize=3):
-    # https://cloud.tencent.com/developer/ask/72570
 
     sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
     guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
     avg_guass_kernal = guass_kernal 
 
-    threshold = conv(x, avg_guass_kernal, 0) - 5
-    
+    threshold = conv(x, avg_guass_kernal, 0) - 5    
 
-    res = np.ones(x.shape, dtype=np.uint8)*255
+    res = np.ones(x.shape, dtype=np.uint8) * 255
     res[x < threshold] = 0
 
-    return res, threshold
+    return res
 
 def get_guassKernal(l=5, sig=1.) -> np.ndarray:
     """\
