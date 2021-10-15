@@ -28,24 +28,18 @@ def main(srcPath, desPath):
     cv2.imwrite(desPath, img)
     
 
-
-def showImg(img):
-    plt.figure(figsize=(10, 10))
-    plt.imshow(img, cmap='gray')
-    plt.show()
-
 if __name__=='__main__':
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--src', required=True)
-    # parser.add_argument('--des', required=False)
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--src', required=True)
+    parser.add_argument('--des', required=False)
+    args = parser.parse_args()
 
-    # src = args.src
-    # des = args.des
+    src = args.src
+    des = args.des
     
-    # if des is None:
-    #     des = os.path.join('./resultImages', os.path.basename(src)) 
+    if des is None:
+        des = os.path.join('./resultImages', os.path.basename(src)) 
 
 
-    # main(src, des)
+    main(src, des)
     main('./sourceImages/W_A1_0_3.jpg', './resultImages/W_A1_0_3.jpg')

@@ -1,4 +1,5 @@
 import cv2
+from matplotlib.pyplot import axis
 import numpy as np
 import os
 import itertools
@@ -54,7 +55,7 @@ def conv(x: np.ndarray, y: np.ndarray, pad_value = 0) -> np.ndarray:
     # sub_matrices[sub_matrices > 0.] = 1.
     
     m = np.einsum('ij,klij->kl', y, sub_matrices)
-
+    
     return m
 
 def connectedComponents(x:np.ndarray):
