@@ -8,43 +8,22 @@ import matplotlib.pyplot as plt
 def main(srcPath, desPath):
     img = cv2.imread(srcPath)
     
-    grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-   
-    hist, bin_edges = np.histogram(grayImg.flatten(), bins=range(256), density=True)
-    newScale = 255 * np.cumsum(hist)
-    newScale = np.concatenate([newScale, [newScale[-1]]], axis=0)
-    newScale = newScale.astype(np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    img = newScale[grayImg]
-    print('avg filter')
-    img = (functions.conv(img, np.ones([11, 11]))/121).astype(np.uint8)
-    print('adpt. threshold')
-   
-    img = functions.adaptiveThreshold(img, kernalSize = 111)
+    img = functions.adaptiveThreshold(img, kernalSize = 111, offset=-3)
+    img = functions.erosion(img, np.ones([7, 7]))
+    for _ in range(3):
+        img = functions.dilation(img, np.ones([7, 7]))
     
-    img = functions.erosion(img, np.ones([5, 5]))
-    img = functions.erosion(img, np.ones([3, 3]))
-   
-    img = functions.dilation(img, np.ones([5, 5]))
-    showImg(img)
 
-    print('CCL')
     labels = functions.connectedComponents(img)
-    
     uni, cnt = np.unique(labels, return_counts=True)
-
-    tmp = np.zeros_like(img, dtype=np.uint8)
-    for u, c in zip(uni[1:], cnt[1:]):
-        if c > 200:
-            tmp[labels == u] = 255
+    tmp = np.zeros(img.shape, dtype=np.uint8)
+    tmp[labels > 0] = 1
+    tmp[labels == uni[np.argmax(cnt[1:]) + 1]] = 0
     img = tmp
-    showImg(img)
 
-    img = functions.erosion(img, np.ones([5, 5]))
-    img = functions.dilation(img, np.ones([5, 5]))
-
-    img[img != 0] = 255
-    showImg(img)
+    img = np.logical_not(img).astype(np.uint8)*255
     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     cv2.imwrite(desPath, img)
     
