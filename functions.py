@@ -54,8 +54,14 @@ def conv(x: np.ndarray, y: np.ndarray, pad_value = 0) -> np.ndarray:
     # convert non_zero elements to 1 (dummy representation)
     # sub_matrices[sub_matrices > 0.] = 1.
     
+   
+    # n = np.zeros(sub_matrices.shape[:2])
+    # for i in range(sub_matrices.shape[0]):
+    #     for j in range(sub_matrices.shape[1]):
+    #         n[i, j] = np.sum(np.multiply(sub_matrices[i, j, :, :], y))
+
     m = np.einsum('ij,klij->kl', y, sub_matrices)
-    
+
     return m
 
 def connectedComponents(x:np.ndarray):
@@ -105,5 +111,4 @@ def get_guassKernal(l=5, sig=1.) -> np.ndarray:
     gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
     kernel = np.outer(gauss, gauss)
     return kernel / np.sum(kernel)
-
 
