@@ -85,11 +85,11 @@ def connectedComponents(x:np.ndarray):
 
     return flag
 
-def adaptiveThreshold(x:np.ndarray, kernalSize=3):
+def adaptiveThreshold(x:np.ndarray, kernalSize=3, offset = -5):
 
     sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
     guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
-    threshold = conv(x, guass_kernal, 0) - 5
+    threshold = conv(x, guass_kernal, 0) + offset
 
     res = np.zeros(x.shape, dtype=np.uint8)
     res[x < threshold] = 1
