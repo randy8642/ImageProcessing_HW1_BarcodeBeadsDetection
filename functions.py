@@ -18,7 +18,7 @@ def readImages(folderPath:str) -> list:
 def erosion(img: np.ndarray, kernal: np.ndarray):
     m, n = kernal.shape
 
-    res = conv(img, kernal, 0).astype(np.uint8)
+    res = convWithPadding(img, kernal, 0).astype(np.uint8)
 
     res[res < m*n] = 0
     res[res >= m*n] = 1
@@ -29,16 +29,21 @@ def erosion(img: np.ndarray, kernal: np.ndarray):
 def dilation(img: np.ndarray, kernal: np.ndarray):
     m, n = kernal.shape
 
+    # create inverse mask of input
     img_inv = np.logical_not(img)
 
-    res = conv(img_inv, kernal, 1).astype(np.uint8)
-    res[res < m*n] = 1
-    res[res >= m*n] = 0
+    # run erosion over inverse mask
+    result_erosion = convWithPadding(img_inv, kernal, 1).astype(np.uint8)
+    result_erosion[result_erosion < m*n] = 0
+    result_erosion[result_erosion >= m*n] = 1
 
-    return res
+    # inverse mask again
+    result = np.logical_not(result_erosion)
+
+    return result
 
 
-def conv(x: np.ndarray, y: np.ndarray, pad_value = 0) -> np.ndarray:
+def convWithPadding(x: np.ndarray, y: np.ndarray, pad_value = 0) -> np.ndarray:
 
     # pad
     pad = np.array(y.shape) // 2
@@ -103,7 +108,7 @@ def adaptiveThreshold(x:np.ndarray, kernalSize=3, offset = -5):
 
     sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
     guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
-    threshold = conv(x, guass_kernal, 0) + offset
+    threshold = convWithPadding(x, guass_kernal, 0) + offset
 
     res = np.zeros(x.shape, dtype=np.uint8)
     res[x < threshold] = 1

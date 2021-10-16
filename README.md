@@ -17,13 +17,13 @@ NCKU 110-1 影像處理與機器人視覺：基礎與設計 作業1
 ### 捲積 Convolution
 #### 程式碼
 ```python
-def conv(img: np.ndarray, kernal: np.ndarray, pad_value = 0) -> np.ndarray:
+def convWithPadding(img: np.ndarray, kernal: np.ndarray, pad_value = 0) -> np.ndarray:
 
     # pad
     padSize = numpy.array(kernal.shape) // 2
-    # 宣告新陣列
+    # define new array for padded image
     paddedImg = numpy.ones([img.shape[0] + padSize[0]*2, img.shape[1] + padSize[1]*2]) * pad_value
-    # 將原陣列複製至新陣列中央
+    # copy origin image to the new array with offset 
     paddedImg[padSize[0]:-padSize[0], padSize[1]:-padSize[1]] = img
     
     # conv windows
@@ -45,12 +45,17 @@ def conv(img: np.ndarray, kernal: np.ndarray, pad_value = 0) -> np.ndarray:
 - `pad_value` 為四周補值時使用的數值
 
 #### 說明
-- `Padding`
-    1. 宣告一個`圖片大小 + (捲積核大小-1)/2`的陣列，並填入填充值
+- `Padding`  
+將圖片的4邊補上指定數值，以確保捲積運算後得到的陣列大小與原陣列大小一致
+    1. 宣告一個`圖片大小 + (捲積核大小-1)/2`的陣列，並填入數值
     2. 將原圖片填入新陣列的中央即完成
-- `Kernal Windows`
-
-- `Convolution`
+- `Kernal Windows`  
+將原始影像切割為一個一個和捲積核一樣大小的小陣列以方便後續的矩陣運算
+- `Convolution`  
+使用迴圈進行捲積運算
+    1. 將每個小矩陣取出
+    2. 與捲積核進行元素相乘
+    3. 計算總和
 
 ### Erosion
 #### 程式碼
@@ -58,14 +63,19 @@ def conv(img: np.ndarray, kernal: np.ndarray, pad_value = 0) -> np.ndarray:
 def erosion(img: numpy.ndarray, kernal: numpy.ndarray):
     m, n = kernal.shape
 
-    result = conv(img, kernal, 0).astype(numpy.uint8)
+    # convolution
+    result = convWithPadding(img, kernal, 0).astype(numpy.uint8)
 
+    # thresholding for eroded mask
     result[result < m*n] = 0
     result[result >= m*n] = 1
 
     return res
 ```
 #### 說明
+1. 對遮罩做捲積運算
+2. 判斷數值是否為捲積核的總和 (**捲積核必須為完整的矩形**)
+3. 若為總和則填入1，否則填入0
 
 ### Dilation
 #### 程式碼
@@ -73,15 +83,48 @@ def erosion(img: numpy.ndarray, kernal: numpy.ndarray):
 def dilation(img: numpy.ndarray, kernal: numpy.ndarray):
     m, n = kernal.shape
 
+    # create inverse mask of input
     img_inv = numpy.logical_not(img)
 
-    result = conv(img_inv, kernal, 1).astype(numpy.uint8)
-    result[result < m*n] = 1
-    result[result >= m*n] = 0
+    # run erosion over inverse mask
+    result_erosion = convWithPadding(img_inv, kernal, 1).astype(numpy.uint8)
+    result_erosion[result_erosion < m*n] = 0
+    result_erosion[result_erosion >= m*n] = 1
+
+    # inverse mask again
+    result = numpy.logical_not(result_erosion)
 
     return result
 ```
 #### 說明
+相當於前後景反轉後執行erosion運算後再次反轉
+1. 將遮罩前後景反轉
+2. 對遮罩做捲積運算 (**捲積核必須為完整的矩形**)
+3. 若為總和則填入0，否則填入1
+
+### Adaptive Thresholding
+#### 程式碼
+```python
+def adaptiveThreshold(x:np.ndarray, kernalSize=3, offset = -5):
+    sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
+    guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
+    threshold = convWithPadding(x, guass_kernal, 0) + offset
+
+    res = np.zeros(x.shape, dtype=np.uint8)
+    res[x < threshold] = 1
+
+    return res
+```
+```python
+def get_guassKernal(l=5, sig=1.) -> np.ndarray:
+    ax = np.linspace(-(l - 1) / 2., (l - 1) / 2., l)
+    gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
+    kernel = np.outer(gauss, gauss)
+    return kernel / np.sum(kernel)
+```
+#### 說明
+
+
 
 ### Connected Component Labeling
 #### 程式碼
@@ -125,7 +168,15 @@ def connectedComponents(img: np.ndarray):
     return mask[1:-1, 1:-1]
 ```
 #### 說明
+連通區域標記分為2個步驟，包含**尋找與標記相連的像素點**與**組合相連的標記**
+1. 尋找與標記相連的像素點  
+遍歷所有非零像素點，並判斷其上下左右4個位置的像素點與中心點的關係
+    - 若其四周皆為零則新增一標號給該點
+    - 若四周有非零的點則標號跟隨該點
+    - 若四周有超過2種非零點則將2種標號標記為連通
 
+2. 組合相連的標記  
+將步驟1之中標記為連通的標號重新編號，確保互相連通的部分為同一標號
 
 
 ## 處理步驟說明
