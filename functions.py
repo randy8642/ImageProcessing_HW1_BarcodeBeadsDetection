@@ -45,52 +45,59 @@ def conv(x: np.ndarray, y: np.ndarray, pad_value = 0) -> np.ndarray:
     padded_x = np.ones([x.shape[0] + pad[0]*2, x.shape[1] + pad[1]*2]) * pad_value
     padded_x[pad[0]:-pad[0], pad[1]:-pad[1]] = x
     
-
     # conv windows
-    # divide the matrix into sub_matrices of kernel size
     view_shape = tuple(np.subtract(padded_x.shape, y.shape) + 1) + y.shape
     strides = padded_x.strides + padded_x.strides
     sub_matrices = np.lib.stride_tricks.as_strided(padded_x, view_shape, strides)
-    # convert non_zero elements to 1 (dummy representation)
-    # sub_matrices[sub_matrices > 0.] = 1.
     
-   
+    # for-loop method
     # n = np.zeros(sub_matrices.shape[:2])
     # for i in range(sub_matrices.shape[0]):
     #     for j in range(sub_matrices.shape[1]):
     #         n[i, j] = np.sum(np.multiply(sub_matrices[i, j, :, :], y))
 
+    # einsum method
     m = np.einsum('ij,klij->kl', y, sub_matrices)
 
     return m
 
-def connectedComponents(x:np.ndarray):
-    labels = [0]
-    connected = [0]
-    flag = np.zeros_like(x, dtype=np.int32)
-    for n, (i, j) in enumerate(itertools.product(range(x.shape[0]), range(x.shape[1]))):
-        if x[i, j] == 0:
-            continue
-       
-        if (i > 0) and (j > 0) and (flag[i-1, j] != 0) and (flag[i, j-1] != 0):
-            connected[flag[i, j-1]] = flag[i-1, j]
-            flag[i, j] = flag[i-1, j]
-        elif ((flag[i-1, j] != 0) and (i > 0)) and ((flag[i, j-1] == 0) or (j == 0)):
-            flag[i, j] = flag[i-1, j]
-        elif ((flag[i-1, j] == 0) or (i == 0)) and ((flag[i, j-1] != 0) and (j > 0)):
-            flag[i, j] = flag[i, j-1]
-        else:
-            labels.append(labels[-1] + 1)
-            connected.append(labels[-1])
-            flag[i, j] = labels[-1]
+def connectedComponents(img: np.ndarray):
+    assert len(img.shape) == 2
 
-    for l in range(1, len(labels)):
-        c = l
-        while c != connected[c]:
-            c = connected[c]
-        flag[flag == l] = c
+    padImg = np.zeros([img.shape[0] + 1 * 2, img.shape[1] + 1 * 2], dtype=bool)
+    padImg[1:-1, 1:-1] = img.astype(bool)
 
-    return flag
+    # 
+    connectedLabel = [0]
+    mask = np.zeros_like(padImg, dtype=np.int32)
+    for i in range(1, padImg.shape[0], 1):
+        for j in range(1, padImg.shape[1], 1):
+            if not padImg[i, j]:
+                continue
+            
+            upper = mask[i-1, j]
+            lefter = mask[i, j-1]
+
+            if upper and (not lefter):
+                mask[i, j] = upper
+            elif (not upper) and lefter:
+                mask[i, j] = lefter
+            elif upper and lefter:
+                mask[i, j] = upper
+                connectedLabel[lefter] = upper
+            elif (not upper) and (not lefter):
+                mask[i, j] = len(connectedLabel)
+                connectedLabel.append(len(connectedLabel))
+
+    # 
+    for n in range(1, len(connectedLabel)):
+        c = n
+        while c != connectedLabel[c]:
+            c = connectedLabel[c]
+
+        mask[mask == n] = c
+
+    return mask[1:-1, 1:-1]
 
 def adaptiveThreshold(x:np.ndarray, kernalSize=3, offset = -5):
 
