@@ -1,6 +1,7 @@
 # ImageProcessing_HW1_BarcodeBeadsDetection
 NCKU 110-1 影像處理與機器人視覺：基礎與設計 作業1
 
+
 ## 環境
 - python v3.9 [網站](https://pipenv-fork.readthedocs.io/en/latest/)
 - pipenv 套件管理工具 [網站](https://pipenv-fork.readthedocs.io/en/latest/) 
