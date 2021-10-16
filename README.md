@@ -116,15 +116,8 @@ def adaptiveThreshold(x:np.ndarray, kernalSize=3, offset = -5):
 
     return res
 ```
-```python
-def get_guassKernal(l=5, sig=1.) -> np.ndarray:
-    ax = np.linspace(-(l - 1) / 2., (l - 1) / 2., l)
-    gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
-    kernel = np.outer(gauss, gauss)
-    return kernel / np.sum(kernel)
-```
 #### 說明
-
+使用高斯核對圖片進行卷積運算來取得局部範圍的加權平均，並以此數值作為二值化的閥值
 
 
 ### Connected Component Labeling
@@ -169,7 +162,7 @@ def connectedComponents(img: np.ndarray):
     return mask[1:-1, 1:-1]
 ```
 #### 說明
-連通區域標記分為2個步驟，包含**尋找與標記相連的像素點**與**組合相連的標記**
+連通區域標記(CCL)分為2個步驟，包含**尋找與標記相連的像素點**與**組合相連的標記**
 1. 尋找與標記相連的像素點  
 遍歷所有非零像素點，並判斷其上下左右4個位置的像素點與中心點的關係
     - 若其四周皆為零則新增一標號給該點
@@ -182,21 +175,27 @@ def connectedComponents(img: np.ndarray):
 
 ## 處理步驟說明
 ### Step 1 : Gray Scale
+將圖片由RGB轉換為灰階影像
 ![grayScale](./img/grayScale.png)
 
 ### Step 2 : Adaptive Threshold
+使用局部加權平均來將圖片二值化
 ![adaptiveThreshold](./img/adaptiveThreshold.png)
 
 ### Step 3 : Erosion
+使用7*7的卷積核對選取到的部分(白色)進行形態學中的侵蝕操作
 ![erode](./img/erode.png)
 
 ### Step 4 : Dilation
+使用7*7的卷積核對選取到的部分(白色)進行形態學中的膨脹操作3次
 ![dilate](./img/dilate.png)
 
 ### Step 5 : Connected Component Labeling filter
+透過連通區域標記並計算物體大小後，將左下的顯微鏡邊緣切除
 ![connectedComponentsLabeling](./img/connectedComponentsLabeling.png)
 
 ### Step 6 : Reverse Color
+根據要求將圖片的前後景反轉
 ![reverse](./img/reverse.png)
 
 ## 結果
