@@ -187,7 +187,7 @@ def connectedComponents(img: np.ndarray):
 ![erode](./img/erode.png)
 
 ### Step 4 : Dilation
-使用7*7的卷積核對選取到的部分(白色)進行形態學中的膨脹操作3次
+使用7*7的卷積核對選取到的部分(白色)進行形態學中的膨脹操作
 ![dilate](./img/dilate.png)
 
 ### Step 5 : Connected Component Labeling filter
