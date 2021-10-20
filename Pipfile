@@ -7,7 +7,6 @@ name = "pypi"
 numpy = "*"
 opencv-python = "*"
 matplotlib = "*"
-scipy = "*"
 
 [dev-packages]
 ipykernel = "*"
