@@ -13,21 +13,21 @@ def main(srcPath, desPath):
     img = img.astype(np.uint8)
     
     # transfer to binary image by adaptive threshold method
-    img = functions.adaptiveThreshold(img, kernalSize = 111, offset=-3)
+    img = functions.adaptiveThreshold(img, kernalSize = 51, offset=-3)
 
     # run erosion (7*7 kernel used)
-    img = functions.erosion(img, np.ones([7, 7]))
+    img = functions.erosion(img, np.ones([5, 5]))
 
-    # run dilation 3 times (7*7 kernel used)
-    for _ in range(3):
-        img = functions.dilation(img, np.ones([7, 7]))
+    # run dilation (7*7 kernel used)
+    img = functions.dilation(img, np.ones([5, 5]))
     
     # CCL
     labels = functions.connectedComponents(img)
     uni, cnt = np.unique(labels, return_counts=True)
     tmp = np.zeros(img.shape, dtype=np.uint8)
-    tmp[labels > 0] = 1
-    tmp[labels == uni[np.argmax(cnt[1:]) + 1]] = 0
+    for u, c in zip(uni[1:], cnt[1:]):
+        if c > 40:
+            tmp[labels == u] = 1
     img = tmp
 
     # reverse black and white
