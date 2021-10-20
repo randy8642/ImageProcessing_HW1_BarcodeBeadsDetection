@@ -183,11 +183,11 @@ def connectedComponents(img: np.ndarray):
 ![adaptiveThreshold](./img/adaptiveThreshold.png)
 
 ### Step 3 : Erosion
-使用7*7的卷積核對選取到的部分(白色)進行形態學中的侵蝕操作
+使用5*5的卷積核對選取到的部分(白色)進行形態學中的侵蝕操作
 ![erode](./img/erode.png)
 
 ### Step 4 : Dilation
-使用7*7的卷積核對選取到的部分(白色)進行形態學中的膨脹操作
+使用5*5的卷積核對選取到的部分(白色)進行形態學中的膨脹操作
 ![dilate](./img/dilate.png)
 
 ### Step 5 : Connected Component Labeling filter
