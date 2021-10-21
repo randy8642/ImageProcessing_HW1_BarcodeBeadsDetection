@@ -13,7 +13,43 @@ def main(srcPath, desPath):
     img = img.astype(np.uint8)
     
     # transfer to binary image by adaptive threshold method
-    img = functions.adaptiveThreshold(img, kernalSize = 51, offset=-3)
+    img = functions.adaptiveThreshold(img, kernalSize = 51, offset=-4)
+
+   
+    # create mask 1
+    tmp = functions.erosion(img, np.ones([3, 3]))
+    tmp = functions.dilation(tmp, np.ones([5, 5]))
+    retval, labels, stats, centroids = cv2.connectedComponentsWithStats(tmp)
+
+    mask_1 = np.zeros_like(labels, dtype=np.uint8)
+    for n, s in enumerate(stats):
+        if n == 0:
+            continue
+        if s[-1] > 500:
+            mask_1[labels == n] = 1
+    mask_1 = functions.dilation(mask_1, np.ones([5, 5]))
+    mask_1 = np.logical_not(mask_1)
+
+
+    # create mask 2
+    tmp = functions.erosion(img, np.ones([3, 3]))
+    tmp = functions.dilation(tmp, np.ones([31, 31]))
+    retval, labels, stats, centroids = cv2.connectedComponentsWithStats(tmp)
+
+    mask_2 = np.zeros_like(labels, dtype=np.uint8)
+    for n, s in enumerate(stats):
+        if n == 0:
+            continue
+        if (s[2] > 200) or (s[3] > 200):
+            mask_2[labels == n] = 1
+    mask_2 = np.logical_not(mask_2)
+
+    # masked
+    mask = np.logical_and(mask_1, mask_2)
+    
+    img = np.logical_and(img, mask) * 1
+    img = img.astype(np.uint8)
+
 
     # run erosion (5*5 kernel used)
     img = functions.erosion(img, np.ones([5, 5]))
@@ -21,14 +57,6 @@ def main(srcPath, desPath):
     # run dilation (5*5 kernel used)
     img = functions.dilation(img, np.ones([5, 5]))
     
-    # CCL
-    labels = functions.connectedComponents(img)
-    uni, cnt = np.unique(labels, return_counts=True)
-    tmp = np.zeros(img.shape, dtype=np.uint8)
-    for u, c in zip(uni[1:], cnt[1:]):
-        if c > 40:
-            tmp[labels == u] = 1
-    img = tmp
 
     # reverse black and white
     img = np.logical_not(img).astype(np.uint8) * 255

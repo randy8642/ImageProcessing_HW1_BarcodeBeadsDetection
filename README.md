@@ -85,15 +85,15 @@ def dilation(img: numpy.ndarray, kernal: numpy.ndarray):
     m, n = kernal.shape
 
     # create inverse mask of input
-    img_inv = numpy.logical_not(img)
+    img_inv = numpy.logical_not(img).astype(numpy.int32) * 1
 
     # run erosion over inverse mask
-    result_erosion = convWithPadding(img_inv, kernal, 1).astype(numpy.uint8)
+    result_erosion = convWithPadding(img_inv, kernal, 1)
     result_erosion[result_erosion < m*n] = 0
     result_erosion[result_erosion >= m*n] = 1
 
     # inverse mask again
-    result = numpy.logical_not(result_erosion)
+    result = numpy.logical_not(result_erosion).astype(numpy.uint8) * 1
 
     return result
 ```
@@ -106,12 +106,12 @@ def dilation(img: numpy.ndarray, kernal: numpy.ndarray):
 ### Adaptive Thresholding
 #### 程式碼
 ```python
-def adaptiveThreshold(x:np.ndarray, kernalSize=3, offset = -5):
+def adaptiveThreshold(x:numpy.ndarray, kernalSize=3, offset = -5):
     sigma = 0.3 * ((kernalSize - 1) * 0.5 - 1) + 0.8
     guass_kernal = get_guassKernal(l=kernalSize, sig=sigma)
     threshold = convWithPadding(x, guass_kernal, 0) + offset
 
-    res = np.zeros(x.shape, dtype=np.uint8)
+    res = numpy.zeros(x.shape, dtype=numpy.uint8)
     res[x < threshold] = 1
 
     return res
@@ -182,6 +182,17 @@ def connectedComponents(img: np.ndarray):
 使用局部加權平均來將圖片二值化
 ![adaptiveThreshold](./img/adaptiveThreshold.png)
 
+### Step 3 : Mask
+使用Connected Components Labeling方法分別由經過2種不同erosion和dilation組合的圖片衷選出雜點\
+- **mask 1**  選出水漬
+![mask_1](./img/mask_1.png)
+
+- **mask 2**  選出大型雜點
+![mask_2](./img/mask_2.png)
+
+- **result**  套用上面2種遮罩
+![mask_result](./img/mask_result.png)
+
 ### Step 3 : Erosion
 使用5*5的卷積核對選取到的部分(白色)進行形態學中的侵蝕操作
 ![erode](./img/erode.png)
@@ -189,10 +200,6 @@ def connectedComponents(img: np.ndarray):
 ### Step 4 : Dilation
 使用5*5的卷積核對選取到的部分(白色)進行形態學中的膨脹操作
 ![dilate](./img/dilate.png)
-
-### Step 5 : Connected Component Labeling filter
-透過連通區域標記並計算物體大小後，將左下的顯微鏡邊緣切除
-![connectedComponentsLabeling](./img/connectedComponentsLabeling.png)
 
 ### Step 6 : Reverse Color
 根據要求將圖片的前後景反轉
@@ -210,3 +217,15 @@ def connectedComponents(img: np.ndarray):
 ### 樣張 3
 ![src_img_3](./sourceImages/W_A3_0_3.jpg)
 ![res_img_3](./resultImages/W_A3_0_3.jpg)
+---
+### 樣張 4
+![src_img_4](./sourceImages/W_B2_3_3.jpg)
+![res_img_4](./resultImages/W_B2_3_3.jpg)
+---
+### 樣張 5
+![src_img_5](./sourceImages/W_B2_6_3.jpg)
+![res_img_5](./resultImages/W_B2_6_3.jpg)
+---
+### 樣張 6
+![src_img_6](./sourceImages/W_B4_0_3.jpg)
+![res_img_6](./resultImages/W_B4_0_3.jpg)

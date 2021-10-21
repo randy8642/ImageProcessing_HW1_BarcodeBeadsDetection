@@ -30,15 +30,15 @@ def dilation(img: np.ndarray, kernal: np.ndarray):
     m, n = kernal.shape
 
     # create inverse mask of input
-    img_inv = np.logical_not(img)
+    img_inv = np.logical_not(img).astype(np.int32) * 1
 
     # run erosion over inverse mask
-    result_erosion = convWithPadding(img_inv, kernal, 1).astype(np.uint8)
+    result_erosion = convWithPadding(img_inv, kernal, 1)
     result_erosion[result_erosion < m*n] = 0
     result_erosion[result_erosion >= m*n] = 1
 
     # inverse mask again
-    result = np.logical_not(result_erosion)
+    result = np.logical_not(result_erosion).astype(np.uint8) * 1
 
     return result
 
