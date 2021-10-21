@@ -15,10 +15,10 @@ def main(srcPath, desPath):
     # transfer to binary image by adaptive threshold method
     img = functions.adaptiveThreshold(img, kernalSize = 51, offset=-3)
 
-    # run erosion (7*7 kernel used)
+    # run erosion (5*5 kernel used)
     img = functions.erosion(img, np.ones([5, 5]))
 
-    # run dilation (7*7 kernel used)
+    # run dilation (5*5 kernel used)
     img = functions.dilation(img, np.ones([5, 5]))
     
     # CCL
