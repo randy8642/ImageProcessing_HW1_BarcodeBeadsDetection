@@ -193,11 +193,11 @@ def connectedComponents(img: np.ndarray):
 - **result**  套用上面2種遮罩
 ![mask_result](./img/mask_result.png)
 
-### Step 3 : Erosion
+### Step 4 : Erosion
 使用5*5的卷積核對選取到的部分(白色)進行形態學中的侵蝕操作
 ![erode](./img/erode.png)
 
-### Step 4 : Dilation
+### Step 5 : Dilation
 使用5*5的卷積核對選取到的部分(白色)進行形態學中的膨脹操作
 ![dilate](./img/dilate.png)
 
